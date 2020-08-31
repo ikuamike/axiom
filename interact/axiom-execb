@@ -1,37 +1,25 @@
 #!/bin/bash
 
-# Reset
-Color_Off='\033[0m'       # Text Reset
+AXIOM_PATH="$HOME/.axiom"
+source "$AXIOM_PATH/interact/includes/vars.sh"
+source "$AXIOM_PATH/interact/includes/do-functions.sh"
 
-# Regular Colors
-Black='\033[0;30m'        # Black
-Red='\033[0;31m'          # Red
-Green='\033[0;32m'        # Green
-Yellow='\033[0;33m'       # Yellow
-Blue='\033[0;34m'         # Blue
-Purple='\033[0;35m'       # Purple
-Cyan='\033[0;36m'         # Cyan
-White='\033[0;37m'        # White
-
-# Bold
-BBlack='\033[1;30m'       # Black
-BRed='\033[1;31m'         # Red
-BGreen='\033[1;32m'       # Green
-BYellow='\033[1;33m'      # Yellow
-BBlue='\033[1;34m'        # Blue
-BPurple='\033[1;35m'      # Purple
-BCyan='\033[1;36m'        # Cyan
-BWhite='\033[1;37m'       # White
-
-droplets=$(doctl compute droplet list -o json)
-instance=$(cat ~/.axiom/profile.json | jq -r '.instance')
+droplets=$(instances)
+selected=$(cat $AXIOM_PATH/selected.conf)
+quiet=false
+query=""
 command="$1"
 
 if [ ! -z "$2" ]
 then
-    instance="$2"
+    query="$2"
+	selected=$(query_instances "$query")
 fi
 
+if [ ! -z "$3" ]
+then
+    quiet=true
+fi
 
 if [ -z "$1" ]
 then
@@ -39,28 +27,23 @@ then
     exit 0
 fi
 
-selected=$(echo $droplets | jq -r '.[].name' | grep -E "$instance")
 total=$(echo $selected | tr ' ' '\n' | wc -l | awk '{ print $1 }')
 
 i=1
 for name in $selected
 do
-    ip=$(doctl compute droplet list | grep $name | awk '{ print $3 }')
-    echo -e "${BWhite}Executing inline on $name at $ip ${Color_Off}"
-    echo -n -e "${Blue}" 
-
-    
+	ip=$(echo $droplets | jq -r ".[] | select(.name == \"$name\") | .networks.v4[].ip_address")
+    echo -e "${BWhite}Executing in the background on $name at $ip ${Color_Off}"
+    echo -n -e "${Blue}"
 
     cmd="$1"
     rendered=$(echo $cmd | sed "s/\$i/$i/g" | sed "s/\$name/$name/g" | sed "s/\$total/$total/g")
 
-
     ssh -p2266 -o StrictHostKeyChecking=no op@"$ip" 'tmux new-session -d -t main'
     ssh -p2266 -o StrictHostKeyChecking=no op@"$ip" tmux send-keys "'$rendered' Enter"
 
-
-    echo -n -e "${Color_Off}" 
-    echo -e "${BGreen}Execute on $name' successful!${Color_Off}" 
+    echo -n -e "${Color_Off}"
+    echo -e "${BGreen}Execute on $name' successful!${Color_Off}"
     i=$((i+1))
 done
 

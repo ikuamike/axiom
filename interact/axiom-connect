@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
-ans="$(jq -r '.instance' ~/.axiom/profile.json)"
-ip="$(doctl compute droplet list | grep "$ans" | awk '{ print $3 }')"
-ssh -p2266 op@"$ip"
+AXIOM_PATH="$HOME/.axiom"
+
+ans="$(cat $AXIOM_PATH/selected.conf)"
+axiom-ssh $ans
