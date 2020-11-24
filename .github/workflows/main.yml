@@ -2,7 +2,7 @@ name: Sync Fork
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # every 30 minutes
+    - cron: '*/5 * * * *' # every 30 minutes
   workflow_dispatch: # on button click
 
 jobs:
@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: tgymnich/fork-sync@v1.3.0
+      - uses: tgymnich/fork-sync@v1.2.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           base: ikuamike:master
-          head: pry0cc:master
-          auto_approve: true
+          head: pry0cc/axiom:master
+          auto_approve: false
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
