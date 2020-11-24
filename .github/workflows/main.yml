@@ -15,6 +15,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           base: ikuamike:master
-          head: pry0cc/axiom:master
+          head: pry0cc:master
           auto_approve: false
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
