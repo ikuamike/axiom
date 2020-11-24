@@ -16,6 +16,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           owner: ikuamike
           base: master
-          head: pry0cc:master
+          head: pry0cc:head
           auto_approve: true
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
